@@ -50,6 +50,8 @@ class doubleUnit():
         predlist,  highest_acc, ruleDefListTran = transformation_learner.rundNLunit(BS)
         print(predlist)
         print(highest_acc)
+        return  predlist, highest_acc, ruleDefListTran
+
 
 
     def runUnit(self):
@@ -266,9 +268,9 @@ if __name__ == "__main__":
     
     if True:
         zeroUnit = doubleUnit(names, bin, num_cont_intervals, TEST_SET_INDEX, data_x_cnt.copy(), data_y_cnt.copy(), data_y_dsc.copy(), kb_preds, op_preds, phases, var_smt = False,subbothfirst=subbothfirst)
-        predOPS, predTRAN, accOPS, accTRAN, ruleOps, ruleTran = zeroUnit.runBasicUnit()
+        predlist, highest_acc, ruleDefListTran = zeroUnit.runBasicUnit()
 
-        loss, stringfunc = zeroUnit.lossOnFunction(predOPS,predTRAN) 
+        #loss, stringfunc = zeroUnit.lossOnFunction(predOPS,predTRAN) 
     else:
     
     
@@ -425,7 +427,7 @@ if __name__ == "__main__":
     time_end = time.time()
     time_total = time_end - time_start    
     print("Final NL functions")
-    print(stringfunc)
+    #print(stringfunc)
     print("Total time elapsed")
     print(time_total)
     print("Rule Output")
