@@ -419,6 +419,77 @@ def createDictOfPredTerms(names, kb_preds, op_preds):
 
     return pred_trans_dict, pred_ops_dict, pred_trans_name_list, pred_ops_name_list
 
+
+
+def buildCntKnowledgeBase(bin, names, num_cont_intervals, data_x, data_y, phase):
+    TEST_SET_INDEX=0
+    #we need the max/min array for potential input feature values
+    #this will be used to determine the interval predicate values (predX < a)
+    max_init=np.max(data_x,axis=0)
+    min_init=np.min(data_x,axis=0)
+
+    #Here we create vector of permutations up to 200, used for selecting random
+    #indicies in the origional dataset, used for training the dNL model
+    #How we define K also determines the Batch Size for the continous input
+    K = 5 #K for K-fold validation
+    L = data_x.shape[0] // K 
+    inds = np.random.permutation( L*K) #perms of 200; [34, 55, 3, ...]
+    DataSets=[]
+
+
+    #So we iterate 5 times and collect data instances based on the indicies 
+    for i in range(K):
+        #we recreate the dataset using the random perm indicies
+        #this line just creates a randomly shuffled dataset, theres probably a scikit method that would do this...
+        DataSets.append(  (data_x[inds[ i*L:(i+1)*L],:] , data_y[inds[ i*L:(i+1)*L]]))
+
+    #define predicates
+    Constants = dict({})
+    #PredCollection is a very important datastructure for dNL
+    #will eventaully contain the KB and objecrive predicates
+    predColl = PredCollection (Constants)
+    var_count = len(names)
+    #my implementation for continous predicates are nonlinear(nl), operation(add, product)
+    #add_continuos provides the  predicates of the form (X1>A)
+    #add_continuous_nl provides non-linear transformations on the feature values (sin,cos, exp)
+    #a number of non-linear predicates are created for each variable
+    for i in range(var_count):
+        predColl.add_continuous(name = names[i], no_lt = num_cont_intervals, no_gt = num_cont_intervals, max_init = max_init[i], min_init = min_init[i])
+
+    for i in range(bin):
+        predColl.add_pred(name='class_%d'%(i+1),arguments=[] , variables=[] , pFunc = DNF(phase + '_' +'class_%d'%(i+1),terms=2,init=[-1,.1,-1,.1],sig=2)   ,use_cnt_vars=True,inc_preds=[])
+
+    predColl.initialize_predicates()
+
+    #add background facts to the KB
+    bg_train = []
+    bg_test = []
+
+    for j in range(K):
+            for i in range(L):
+                bg = Background( predColl)
+
+                for b in range(bin):
+                    bg.add_example(pred_name='class_%d'%(b+1),pair=( ), value= float(DataSets[j][1][i]==b) )
+                #forloop adds...????
+                for k in range(var_count):
+                    bg.add_continuous_value( names[k],( (DataSets[j][0][i,k] ,),))
+                if j == TEST_SET_INDEX:
+                    bg_test.append(bg)
+                else:
+                    bg_train.append(bg)
+    BS  = len(bg_test)
+
+    return predColl, bg_train, bg_test, BS, DataSets, L
+
+                
+
+
+
+
+
+
+
 def buildKnowledgeBase(bin, names, num_cont_intervals, kb_preds, op_preds, data_x, data_y, transform=True, operation=False , phase='', var_smt = False, subbothfirst = [True,True]):
     '''
     method responsible for building the targert predicates and background predicates
@@ -459,6 +530,11 @@ def buildKnowledgeBase(bin, names, num_cont_intervals, kb_preds, op_preds, data_
     #add_continuos provides the  predicates of the form (X1>A)
     #add_continuous_nl provides non-linear transformations on the feature values (sin,cos, exp)
     #a number of non-linear predicates are created for each variable
+    if var_smt:
+        predColl.add_continuous(name = names[i], no_lt = num_cont_intervals, no_gt = num_cont_intervals, max_init = max_init[i], min_init = min_init[i])
+
+    
+    
     if transform:
         for i in range(var_count):
             if var_smt:

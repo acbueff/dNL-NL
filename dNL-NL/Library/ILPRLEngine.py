@@ -644,6 +644,9 @@ class ILPRLEngine(object):
         print(self.filter_predicates)
         print("Highest accuracy is ",highest_acc)
 
+        
+        return  highest_acc
+
 
 
 

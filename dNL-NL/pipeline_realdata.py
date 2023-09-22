@@ -52,7 +52,16 @@ class doubleUnit():
         print(highest_acc)
         return  predlist, highest_acc, ruleDefListTran
 
-
+    def runCntOnlyUnit(self):
+        #pred_trans_dict, pred_ops_dict, pred_trans_name_list, pred_ops_name_list = createDictOfPredTerms(self.names, self.kb_preds, self.op_preds)
+        #predColl, bg_train, bg_test, BS, DataSets, L = buildKnowledgeBase(self.bin, self.names.copy(), self.num_cont_intervals, self.kb_preds, self.op_preds, self.data_x, self.data_y_dsc, transform=False, operation=False, phase= self.phase1, var_smt=True, subbothfirst=self.subbothfirst )
+        predColl, bg_train, bg_test, BS, DataSets, L = buildCntKnowledgeBase(self.bin, self.names.copy(), self.num_cont_intervals,self.data_x, self.data_y_dsc, phase= self.phase1)
+        
+        baseline_learner = vanilladNLunit(self.bin, bg_train, bg_test, DataSets,self.TEST_SET_INDEX, L, self.num_cont_intervals, self.names.copy(), predColl, self.phase1, self.iterations)
+        highest_acc, ruleDefListTran = baseline_learner.rundNLunit(BS)
+        #print(predlist)
+        print(highest_acc)
+        return  highest_acc, ruleDefListTran
 
     def runUnit(self):
         '''
@@ -267,8 +276,13 @@ if __name__ == "__main__":
     
     
     if True:
-        zeroUnit = doubleUnit(names, bin, num_cont_intervals, TEST_SET_INDEX, data_x_cnt.copy(), data_y_cnt.copy(), data_y_dsc.copy(), kb_preds, op_preds, phases, var_smt = False,subbothfirst=subbothfirst)
-        predlist, highest_acc, ruleDefListTran = zeroUnit.runBasicUnit()
+        #zeroUnit = doubleUnit(names, bin, num_cont_intervals, TEST_SET_INDEX, data_x_cnt.copy(), data_y_cnt.copy(), data_y_dsc.copy(), kb_preds, op_preds, phases, var_smt = False,subbothfirst=subbothfirst)
+        #predlist, highest_acc, ruleDefListTran = zeroUnit.runBasicUnit()
+
+
+        baselineUnit = doubleUnit(names, bin, num_cont_intervals, TEST_SET_INDEX, data_x_cnt.copy(), data_y_cnt.copy(), data_y_dsc.copy(), kb_preds, op_preds, phases, var_smt = False,subbothfirst=subbothfirst)
+        highest_acc = baselineUnit.runCntOnlyUnit()
+
 
         #loss, stringfunc = zeroUnit.lossOnFunction(predOPS,predTRAN) 
     else:

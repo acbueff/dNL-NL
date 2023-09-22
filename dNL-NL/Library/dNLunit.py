@@ -134,7 +134,7 @@ class dNLunit():
 
 class vanilladNLunit():
 
-    def __init__(self,bin, bg_train, bg_test,DataSets,TEST_SET_INDEX, L, num_cont_intervals, names, pred_trans_name_list, predColl, phase, iterations=100*12 ):
+    def __init__(self,bin, bg_train, bg_test,DataSets,TEST_SET_INDEX, L, num_cont_intervals, names, predColl, phase, iterations=100*12 ):
         x=0
         self.bin = bin
         self.bg_train = bg_train
@@ -145,7 +145,7 @@ class vanilladNLunit():
 
         self.num_cont_intervals = num_cont_intervals
         self.names = names
-        self.pred_trans_name_list = pred_trans_name_list
+        #self.pred_trans_name_list = pred_trans_name_list
         self.predColl = predColl
         self.phase = phase
         self.model = None
@@ -175,7 +175,7 @@ class vanilladNLunit():
         
         cl_list = []
         for b in range(self.bin):
-            cl = outp[self.phase +'_'+ 'class_%d'%(b+1)]
+            cl = outp['class_%d'%(b+1)]
             cl_list.append(cl)
         #cl1 = outp['class_1']
         #cl2 = outp['class_2']
@@ -240,7 +240,7 @@ class vanilladNLunit():
         parser.add_argument('--CONT_INTERVALS', default=self.num_cont_intervals, help='Number of continuous ranges', type=int)
         parser.add_argument('--CONT_VARIABLES', default=self.names, help='Number variables', type=list)
 
-        parser.add_argument('--ATOM_NAMES',default=self.pred_trans_name_list, help='Dict of predicate names', type=dict)
+        #parser.add_argument('--ATOM_NAMES',default=self.pred_trans_name_list, help='Dict of predicate names', type=dict)
 
 
 
@@ -250,10 +250,10 @@ class vanilladNLunit():
         for arg in vars(args):
             print( '{}-{}'.format(arg, getattr(args, arg)))
 
-        self.model = ILPRLEngine( args = args, predColl = self.predColl, bgs = self.bgs, disp_fn = self.disp_fn, phase = self.phase)
-        predlist, highest_acc = self.model.train_model()
-        ruleDefList = self.model.ruleDefintionStringList
-        return predlist, highest_acc, ruleDefList
+        self.model = ILPRLEngine( args = args, predColl = self.predColl, bgs = self.bgs, disp_fn = self.disp_fn)
+        highest_acc = self.model.train_model()
+        #ruleDefList = self.model.ruleDefintionStringList
+        return highest_acc
 
     def retrainModel(self):
         '''
